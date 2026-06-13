@@ -1,4 +1,5 @@
 import type { JSONContent } from '@tiptap/core'
+import type { TableCellOptions, TableHeaderOptions, TableOptions, TableRowOptions } from '@tiptap/extension-table'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 
 export type PageType = 'cover' | 'body' | 'toc' | string
@@ -28,6 +29,10 @@ export interface DocsKitOptions {
   starterKit: false | Record<string, unknown>
   textAlign: false | { types?: string[] }
   textColor: false | Record<string, unknown>
+  table: false | Partial<TableOptions>
+  tableCell: false | Partial<TableCellOptions>
+  tableHeader: false | Partial<TableHeaderOptions>
+  tableRow: false | Partial<TableRowOptions>
   page: false | Partial<PageOptions>
   pageBreak: false | Partial<PageBreakOptions>
 }

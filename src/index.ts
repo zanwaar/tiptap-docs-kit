@@ -11,6 +11,10 @@ import '@tiptap/extension-paragraph'
 import '@tiptap/extension-strike'
 import '@tiptap/extension-underline'
 import '@tiptap/extensions/undo-redo'
+import { Table } from '@tiptap/extension-table'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableRow } from '@tiptap/extension-table-row'
 import StarterKit from '@tiptap/starter-kit'
 import { createWordPagePastePlugin } from './paste'
 import { handlePageBackspace } from './keyboard'
@@ -67,6 +71,7 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
+export { Table, TableCell, TableHeader, TableRow }
 
 export const DocsKit = Extension.create<DocsKitOptions>({
   name: 'docsKit',
@@ -76,6 +81,12 @@ export const DocsKit = Extension.create<DocsKitOptions>({
       starterKit: {},
       textAlign: {},
       textColor: {},
+      table: {
+        resizable: true,
+      },
+      tableCell: {},
+      tableHeader: {},
+      tableRow: {},
       page: {},
       pageBreak: {},
     }
@@ -94,6 +105,22 @@ export const DocsKit = Extension.create<DocsKitOptions>({
 
     if (this.options.textColor !== false) {
       extensions.push(TextColor.configure(this.options.textColor))
+    }
+
+    if (this.options.table !== false) {
+      extensions.push(Table.configure(this.options.table))
+    }
+
+    if (this.options.tableRow !== false) {
+      extensions.push(TableRow.configure(this.options.tableRow))
+    }
+
+    if (this.options.tableHeader !== false) {
+      extensions.push(TableHeader.configure(this.options.tableHeader))
+    }
+
+    if (this.options.tableCell !== false) {
+      extensions.push(TableCell.configure(this.options.tableCell))
     }
 
     if (this.options.page !== false) {
