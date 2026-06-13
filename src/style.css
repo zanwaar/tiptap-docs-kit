@@ -113,12 +113,15 @@
 }
 
 .a4-page table[data-docs-table-kind='grid'] th,
-.a4-page table[data-docs-table-kind='grid'] td {
+.a4-page table[data-docs-table-kind='grid'] td,
+.a4-page th[data-docs-cell-kind='grid'],
+.a4-page td[data-docs-cell-kind='grid'] {
   border-color: var(--word-page-grid-border-color, #9aa0a6);
-  border-style: dotted;
+  border-style: dashed;
 }
 
-.a4-page table[data-docs-table-kind='grid'] th {
+.a4-page table[data-docs-table-kind='grid'] th,
+.a4-page th[data-docs-cell-kind='grid'] {
   font-weight: 400;
 }
 

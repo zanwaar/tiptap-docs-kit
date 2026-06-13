@@ -72,7 +72,7 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
-export { DocsTable as Table, TableCell, TableHeader, TableRow }
+export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, TableRow }
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -84,6 +84,9 @@ declare module '@tiptap/core' {
 
 const createGridCell = () => ({
   type: 'tableCell',
+  attrs: {
+    docsCellKind: 'grid',
+  },
   content: [{ type: 'paragraph' }],
 })
 
@@ -121,6 +124,38 @@ const DocsTable = Table.extend({
     return {
       ...this.parent?.(),
       insertGrid: (options = {}) => ({ commands }) => commands.insertContent(createGrid(options)),
+    }
+  },
+})
+
+const gridCellAttribute = {
+  docsCellKind: {
+    default: null,
+    parseHTML: (element: HTMLElement) => element.getAttribute('data-docs-cell-kind'),
+    renderHTML: (attributes: Record<string, unknown>) => {
+      if (!attributes.docsCellKind) return {}
+
+      return {
+        'data-docs-cell-kind': attributes.docsCellKind,
+      }
+    },
+  },
+}
+
+const DocsTableCell = TableCell.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      ...gridCellAttribute,
+    }
+  },
+})
+
+const DocsTableHeader = TableHeader.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      ...gridCellAttribute,
     }
   },
 })
@@ -168,11 +203,11 @@ export const DocsKit = Extension.create<DocsKitOptions>({
     }
 
     if (this.options.tableHeader !== false) {
-      extensions.push(TableHeader.configure(this.options.tableHeader))
+      extensions.push(DocsTableHeader.configure(this.options.tableHeader))
     }
 
     if (this.options.tableCell !== false) {
-      extensions.push(TableCell.configure(this.options.tableCell))
+      extensions.push(DocsTableCell.configure(this.options.tableCell))
     }
 
     if (this.options.page !== false) {
