@@ -26,13 +26,14 @@ import {
   defaultPageAttrs,
   pageClassNames,
 } from './page-model'
-import type { DocsKitOptions, InsertPageOptions, PageAttrs, PageBreakOptions, PageOptions, WordPageTemplateName } from './types'
+import type { DocsKitOptions, InsertGridOptions, InsertPageOptions, PageAttrs, PageBreakOptions, PageOptions, WordPageTemplateName } from './types'
 
 export type {
   InsertPageOptions,
   PageAttrs,
   PageBreakOptions,
   DocsKitOptions,
+  InsertGridOptions,
   PageMargin,
   PageOptions,
   PageOrientation,
@@ -71,7 +72,58 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
-export { Table, TableCell, TableHeader, TableRow }
+export { DocsTable as Table, TableCell, TableHeader, TableRow }
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    docsGrid: {
+      insertGrid: (options?: InsertGridOptions) => ReturnType
+    }
+  }
+}
+
+const createGridCell = () => ({
+  type: 'tableCell',
+  content: [{ type: 'paragraph' }],
+})
+
+const createGridRow = (cols: number) => ({
+  type: 'tableRow',
+  content: Array.from({ length: cols }, createGridCell),
+})
+
+const createGrid = ({ rows = 3, cols = 3 }: InsertGridOptions = {}) => ({
+  type: 'table',
+  attrs: {
+    docsTableKind: 'grid',
+  },
+  content: Array.from({ length: rows }, () => createGridRow(cols)),
+})
+
+const DocsTable = Table.extend({
+  addAttributes() {
+    return {
+      docsTableKind: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-docs-table-kind'),
+        renderHTML: (attributes) => {
+          if (!attributes.docsTableKind) return {}
+
+          return {
+            'data-docs-table-kind': attributes.docsTableKind,
+          }
+        },
+      },
+    }
+  },
+
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      insertGrid: (options = {}) => ({ commands }) => commands.insertContent(createGrid(options)),
+    }
+  },
+})
 
 export const DocsKit = Extension.create<DocsKitOptions>({
   name: 'docsKit',
@@ -108,7 +160,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
     }
 
     if (this.options.table !== false) {
-      extensions.push(Table.configure(this.options.table))
+      extensions.push(DocsTable.configure(this.options.table))
     }
 
     if (this.options.tableRow !== false) {

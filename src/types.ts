@@ -25,6 +25,11 @@ export interface PageBreakOptions {
   HTMLAttributes: Record<string, unknown>
 }
 
+export interface InsertGridOptions {
+  rows?: number
+  cols?: number
+}
+
 export interface DocsKitOptions {
   starterKit: false | Record<string, unknown>
   textAlign: false | { types?: string[] }

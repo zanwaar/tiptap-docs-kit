@@ -114,6 +114,7 @@ editor.chain().focus().unsetTextColor().run()
 
 ```ts
 editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+editor.chain().focus().insertGrid({ rows: 4, cols: 4 }).run()
 editor.chain().focus().addColumnAfter().run()
 editor.chain().focus().addRowAfter().run()
 editor.chain().focus().deleteColumn().run()

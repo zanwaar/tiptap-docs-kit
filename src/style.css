@@ -112,6 +112,16 @@
   font-weight: 700;
 }
 
+.a4-page table[data-docs-table-kind='grid'] th,
+.a4-page table[data-docs-table-kind='grid'] td {
+  border-color: var(--word-page-grid-border-color, #9aa0a6);
+  border-style: dotted;
+}
+
+.a4-page table[data-docs-table-kind='grid'] th {
+  font-weight: 400;
+}
+
 .a4-page .selectedCell::after {
   background: var(--word-page-table-selected-background, rgb(0 0 0 / 8%));
   content: '';
