@@ -202,6 +202,95 @@ const mergeContinuationTables = (tail: ProseMirrorNode, nextPage: ProseMirrorNod
   return tail.type.create(tail.attrs, [...tailRows, ...nextRowsWithoutHeader], tail.marks)
 }
 
+const findTableBlockIndex = (page: ProseMirrorNode): number => {
+  for (let index = page.childCount - 1; index >= 0; index -= 1) {
+    if (page.child(index).type.name === 'table') return index
+  }
+
+  return -1
+}
+
+const createTableWithoutRepeatedHeader = (table: ProseMirrorNode): ProseMirrorNode => {
+  const rows = removeRepeatedHeaderRows(table)
+  return table.type.create(table.attrs, rows, table.marks)
+}
+
+const reflowTableRowsBackward = (
+  editor: Editor,
+  pageElements: HTMLElement[],
+  options: WordPagePaginationOptions,
+): boolean => {
+  const overflowTolerance = options.overflowTolerance ?? 8
+  const pagePositions = getPagePositions(editor)
+
+  for (let pageIndex = 0; pageIndex < pagePositions.length - 1; pageIndex += 1) {
+    const pageElement = pageElements[pageIndex]
+    if (!pageElement || pageElement.scrollHeight > pageElement.clientHeight + overflowTolerance) continue
+
+    const page = editor.state.doc.child(pageIndex)
+    const nextPage = editor.state.doc.child(pageIndex + 1)
+    if (page.type.name !== 'page' || nextPage?.type.name !== 'page') continue
+
+    const tableIndex = findTableBlockIndex(page)
+    const table = tableIndex >= 0 ? page.child(tableIndex) : null
+    const nextTable = nextPage.firstChild
+    if (!table || table.type.name !== 'table' || !nextTable || nextTable.type.name !== 'table') continue
+
+    const nextRows = removeRepeatedHeaderRows(nextTable)
+    const nextDataRows = nextRows[0]?.attrs.docsRepeatedHeader ? nextRows.slice(1) : nextRows
+    if (nextDataRows.length === 0) continue
+
+    const pageTableElement = pageElement.children.item(tableIndex)
+    const nextPageElement = pageElements[pageIndex + 1]
+    const nextTableElement = nextPageElement?.children.item(0)
+    const nextTableRows = nextTableElement
+      ? Array.from(nextTableElement.querySelectorAll<HTMLTableRowElement>('tr'))
+      : []
+    const nextRowElement = nextRows[0]?.attrs.docsRepeatedHeader ? nextTableRows[1] : nextTableRows[0]
+    if (!pageTableElement || !nextRowElement) continue
+
+    const availableHeight = getPageContentBottom(pageElement, overflowTolerance) - pageTableElement.getBoundingClientRect().bottom
+    const nextRowHeight = nextRowElement.getBoundingClientRect().height
+    if (nextRowHeight > availableHeight) continue
+
+    const movedRow = nextDataRows[0]
+    const candidateTable = table.type.create(table.attrs, [
+      ...Array.from({ length: table.childCount }, (_, index) => table.child(index)),
+      movedRow,
+    ], table.marks)
+    const remainingNextRows = nextDataRows.slice(1)
+    const repeatedHeader = nextRows[0]?.attrs.docsRepeatedHeader ? nextRows[0] : null
+    const nextReplacementRows = repeatedHeader && remainingNextRows.length > 0
+      ? [repeatedHeader, ...remainingNextRows]
+      : remainingNextRows
+    const nextReplacementTable = nextReplacementRows.length > 0
+      ? nextTable.type.create(nextTable.attrs, nextReplacementRows, nextTable.marks)
+      : null
+
+    const pageStart = pagePositions[pageIndex].start
+    const nextPageStart = pagePositions[pageIndex + 1].start
+    let tableStart = pageStart + 1
+    for (let index = 0; index < tableIndex; index += 1) {
+      tableStart += page.child(index).nodeSize
+    }
+
+    const transaction = editor.state.tr.replaceWith(tableStart, tableStart + table.nodeSize, candidateTable)
+    const mappedNextPageStart = transaction.mapping.map(nextPageStart)
+    const mappedNextTableStart = mappedNextPageStart + 1
+
+    if (nextReplacementTable) {
+      transaction.replaceWith(mappedNextTableStart, mappedNextTableStart + nextTable.nodeSize, nextReplacementTable)
+    } else {
+      transaction.delete(mappedNextTableStart, mappedNextTableStart + nextTable.nodeSize)
+    }
+
+    editor.view.dispatch(transaction.scrollIntoView())
+    return true
+  }
+
+  return false
+}
+
 export const normalizeWordPages = (editor: Editor): boolean => {
   const pagePositions = getPagePositions(editor)
   if (pagePositions.length <= 1) return false
@@ -241,6 +330,9 @@ export const paginateWordPages = (
   const pageSelector = options.pageSelector ?? '.a4-page'
   const overflowTolerance = options.overflowTolerance ?? 8
   const pageElements = Array.from(rootElement.querySelectorAll<HTMLElement>(pageSelector))
+
+  if (reflowTableRowsBackward(editor, pageElements, options)) return true
+
   const overflowIndex = pageElements.findIndex((pageElement) => pageElement.scrollHeight > pageElement.clientHeight + overflowTolerance)
 
   if (overflowIndex === -1) return false
