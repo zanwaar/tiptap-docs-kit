@@ -24,7 +24,7 @@
   box-sizing: border-box;
   flex-shrink: 0;
   height: var(--word-page-height, 1056px);
-  margin: var(--word-page-margin-y, 48px) auto;
+  margin: var(--word-page-margin-y, 20px) auto;
   overflow: hidden;
   padding: var(--word-page-padding, 96px);
   position: relative;
@@ -50,7 +50,7 @@
 }
 
 .a4-page--last {
-  margin-bottom: var(--word-page-last-margin-bottom, 96px);
+  margin-bottom: var(--word-page-last-margin-bottom, 40px);
 }
 
 .a4-page > * {
