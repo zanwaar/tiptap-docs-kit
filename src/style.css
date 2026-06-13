@@ -108,7 +108,7 @@
 }
 
 .a4-page th {
-  background: var(--word-page-table-header-background, #f5f5f5);
+  background: var(--word-page-table-header-background, #ffffff);
   font-weight: 700;
 }
 
