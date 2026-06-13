@@ -11,6 +11,7 @@
 - Text alignment untuk paragraph dan heading.
 - Text color mark dengan command `setTextColor` dan `unsetTextColor`.
 - Table editing dengan insert, add/delete row/column, merge/split cell, dan resize column.
+- Table-aware pagination yang memecah tabel panjang per row saat melewati batas halaman.
 - CSS dokumen satu file lewat `tiptap-docs-kit/style.css`.
 - Helper untuk membuat dokumen kosong dan template dokumen.
 
@@ -123,6 +124,8 @@ editor.chain().focus().deleteTable().run()
 editor.chain().focus().mergeCells().run()
 editor.chain().focus().splitCell().run()
 ```
+
+Tabel panjang akan dipisah antar halaman pada batas row. Jika tabel memiliki header row, header akan diulang pada tabel lanjutan di halaman berikutnya.
 
 ## Konfigurasi DocsKit
 

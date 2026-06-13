@@ -121,6 +121,87 @@ const splitTextblockTail = (
   }
 }
 
+const getPageContentBottom = (pageElement: HTMLElement, overflowTolerance: number): number => {
+  const pageStyles = window.getComputedStyle(pageElement)
+  const pagePaddingBottom = Number.parseFloat(pageStyles.paddingBottom) || 0
+
+  return pageElement.getBoundingClientRect().bottom - pagePaddingBottom - overflowTolerance
+}
+
+const isHeaderTableRow = (row: ProseMirrorNode): boolean => (
+  row.childCount > 0 && Array.from({ length: row.childCount }, (_, index) => row.child(index))
+    .every((cell) => cell.type.name === 'tableHeader')
+)
+
+const findFittingTableRowCount = (pageElement: HTMLElement, tableElement: Element, overflowTolerance: number): number => {
+  const rows = Array.from(tableElement.querySelectorAll<HTMLTableRowElement>('tr'))
+  if (rows.length <= 1) return rows.length
+
+  const contentBottom = getPageContentBottom(pageElement, overflowTolerance)
+  let fittingRows = 0
+
+  for (const row of rows) {
+    if (row.getBoundingClientRect().bottom > contentBottom) break
+    fittingRows += 1
+  }
+
+  return fittingRows
+}
+
+const splitTableTail = (
+  table: ProseMirrorNode,
+  pageElement: HTMLElement,
+  tableBlockElement: Element,
+  overflowTolerance: number,
+): { head: ProseMirrorNode, tail: ProseMirrorNode } | null => {
+  if (table.type.name !== 'table' || table.childCount <= 1) return null
+
+  const tableElement = tableBlockElement.matches('table')
+    ? tableBlockElement
+    : tableBlockElement.querySelector('table')
+  if (!tableElement) return null
+
+  const headerRow = table.firstChild
+  const shouldRepeatHeader = headerRow ? isHeaderTableRow(headerRow) && !headerRow.attrs.docsRepeatedHeader : false
+  const minimumHeadRows = shouldRepeatHeader ? 2 : 1
+  const fittingRows = findFittingTableRowCount(pageElement, tableElement, overflowTolerance)
+  const splitIndex = Math.max(minimumHeadRows, fittingRows)
+
+  if (splitIndex >= table.childCount) return null
+
+  const headRows = Array.from({ length: splitIndex }, (_, index) => table.child(index))
+  const tailRows = Array.from({ length: table.childCount - splitIndex }, (_, index) => table.child(splitIndex + index))
+  const repeatedHeaderRow = shouldRepeatHeader && headerRow
+    ? headerRow.type.create({ ...headerRow.attrs, docsRepeatedHeader: 'true' }, headerRow.content, headerRow.marks)
+    : null
+  const repeatedTailRows = repeatedHeaderRow
+    ? [repeatedHeaderRow, ...tailRows]
+    : tailRows
+
+  return {
+    head: table.type.create(table.attrs, headRows, table.marks),
+    tail: table.type.create(table.attrs, repeatedTailRows, table.marks),
+  }
+}
+
+const removeRepeatedHeaderRows = (table: ProseMirrorNode): ProseMirrorNode[] => (
+  Array.from({ length: table.childCount }, (_, index) => table.child(index))
+    .filter((row, index) => index === 0 || !row.attrs.docsRepeatedHeader)
+)
+
+const mergeContinuationTables = (tail: ProseMirrorNode, nextPage: ProseMirrorNode): ProseMirrorNode | null => {
+  const nextTable = nextPage.firstChild
+  if (!nextTable || nextTable.type.name !== 'table') return null
+
+  const tailRows = removeRepeatedHeaderRows(tail)
+  const nextRows = removeRepeatedHeaderRows(nextTable)
+  const nextRowsWithoutHeader = nextRows[0]?.attrs.docsRepeatedHeader
+    ? nextRows.slice(1)
+    : nextRows
+
+  return tail.type.create(tail.attrs, [...tailRows, ...nextRowsWithoutHeader], tail.marks)
+}
+
 export const normalizeWordPages = (editor: Editor): boolean => {
   const pagePositions = getPagePositions(editor)
   if (pagePositions.length <= 1) return false
@@ -181,6 +262,38 @@ export const paginateWordPages = (
   }
 
   const lastBlockElement = pageElements[overflowIndex]?.children.item(pageNode.childCount - 1)
+  const splitTable = lastBlockElement
+    ? splitTableTail(lastBlock, pageElements[overflowIndex], lastBlockElement, overflowTolerance)
+    : null
+
+  if (splitTable) {
+    const nextNode = editor.state.doc.child(overflowIndex + 1)
+    const transaction = editor.state.tr.replaceWith(lastBlockStart, lastBlockStart + lastBlock.nodeSize, splitTable.head)
+    const nextPageStart = transaction.mapping.map(pageStart + pageNode.nodeSize)
+
+    if (nextNode?.type.name === 'page') {
+      const mergedContinuation = mergeContinuationTables(splitTable.tail, nextNode)
+
+      if (mergedContinuation && nextNode.firstChild) {
+        transaction.replaceWith(
+          nextPageStart + 1,
+          nextPageStart + 1 + nextNode.firstChild.nodeSize,
+          mergedContinuation,
+        )
+      } else {
+        transaction.insert(nextPageStart + 1, splitTable.tail)
+      }
+    } else {
+      transaction.insert(nextPageStart, editor.schema.nodes.page.create(
+        createOverflowPageAttrs(options.createPageAttrs),
+        splitTable.tail,
+      ))
+    }
+
+    editor.view.dispatch(transaction.scrollIntoView())
+    return true
+  }
+
   const fitOffset = lastBlockElement
     ? findPageFitOffset(pageElements[overflowIndex], lastBlockElement, lastBlock.textContent, overflowTolerance)
     : null

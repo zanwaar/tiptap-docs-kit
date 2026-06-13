@@ -72,7 +72,7 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
-export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, TableRow }
+export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, DocsTableRow as TableRow }
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -160,6 +160,24 @@ const DocsTableHeader = TableHeader.extend({
   },
 })
 
+const DocsTableRow = TableRow.extend({
+  addAttributes() {
+    return {
+      docsRepeatedHeader: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-docs-repeated-header'),
+        renderHTML: (attributes) => {
+          if (!attributes.docsRepeatedHeader) return {}
+
+          return {
+            'data-docs-repeated-header': attributes.docsRepeatedHeader,
+          }
+        },
+      },
+    }
+  },
+})
+
 export const DocsKit = Extension.create<DocsKitOptions>({
   name: 'docsKit',
 
@@ -199,7 +217,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
     }
 
     if (this.options.tableRow !== false) {
-      extensions.push(TableRow.configure(this.options.tableRow))
+      extensions.push(DocsTableRow.configure(this.options.tableRow))
     }
 
     if (this.options.tableHeader !== false) {
