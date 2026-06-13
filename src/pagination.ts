@@ -291,6 +291,52 @@ const reflowTableRowsBackward = (
   return false
 }
 
+const reflowBlocksBackward = (
+  editor: Editor,
+  pageElements: HTMLElement[],
+  options: WordPagePaginationOptions,
+): boolean => {
+  const overflowTolerance = options.overflowTolerance ?? 8
+  const pagePositions = getPagePositions(editor)
+
+  for (let pageIndex = 0; pageIndex < pagePositions.length - 1; pageIndex += 1) {
+    const pageElement = pageElements[pageIndex]
+    const nextPageElement = pageElements[pageIndex + 1]
+    if (!pageElement || !nextPageElement) continue
+    if (pageElement.scrollHeight > pageElement.clientHeight + overflowTolerance) continue
+
+    const page = editor.state.doc.child(pageIndex)
+    const nextPage = editor.state.doc.child(pageIndex + 1)
+    if (page.type.name !== 'page' || nextPage?.type.name !== 'page' || nextPage.childCount === 0) continue
+
+    const firstNextBlock = nextPage.firstChild
+    const firstNextBlockElement = nextPageElement.children.item(0)
+    if (!firstNextBlock || !firstNextBlockElement) continue
+
+    const pageStyles = window.getComputedStyle(pageElement)
+    const pagePaddingTop = Number.parseFloat(pageStyles.paddingTop) || 0
+    const contentBottom = getPageContentBottom(pageElement, overflowTolerance)
+    const lastBlockBottom = pageElement.lastElementChild
+      ? pageElement.lastElementChild.getBoundingClientRect().bottom
+      : pageElement.getBoundingClientRect().top + pagePaddingTop
+    const availableHeight = contentBottom - lastBlockBottom
+    const firstNextBlockHeight = firstNextBlockElement.getBoundingClientRect().height
+    if (firstNextBlockHeight > availableHeight) continue
+
+    const pageStart = pagePositions[pageIndex].start
+    const nextPageStart = pagePositions[pageIndex + 1].start
+    const insertPosition = pageStart + page.nodeSize - 1
+    const firstNextBlockStart = nextPageStart + 1
+    const transaction = editor.state.tr.delete(firstNextBlockStart, firstNextBlockStart + firstNextBlock.nodeSize)
+    transaction.insert(transaction.mapping.map(insertPosition), firstNextBlock)
+
+    editor.view.dispatch(transaction.scrollIntoView())
+    return true
+  }
+
+  return false
+}
+
 export const normalizeWordPages = (editor: Editor): boolean => {
   const pagePositions = getPagePositions(editor)
   if (pagePositions.length <= 1) return false
@@ -332,6 +378,7 @@ export const paginateWordPages = (
   const pageElements = Array.from(rootElement.querySelectorAll<HTMLElement>(pageSelector))
 
   if (reflowTableRowsBackward(editor, pageElements, options)) return true
+  if (reflowBlocksBackward(editor, pageElements, options)) return true
 
   const overflowIndex = pageElements.findIndex((pageElement) => pageElement.scrollHeight > pageElement.clientHeight + overflowTolerance)
 
