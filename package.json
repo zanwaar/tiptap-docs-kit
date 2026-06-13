@@ -1,0 +1,35 @@
+{
+  "name": "tiptap-docs-kit",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Tiptap kit for document editors with Word-like pages, pagination, and document styling.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/style.css dist/style.css",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@tiptap/core": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1"
+  },
+  "devDependencies": {
+    "@tiptap/core": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
+    "typescript": "~6.0.2"
+  }
+}

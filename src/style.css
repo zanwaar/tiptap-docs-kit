@@ -1,0 +1,218 @@
+.word-editor-document,
+.word-page-document {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.word-editor-document:focus,
+.word-page-document:focus,
+.workspace .tiptap,
+.word-page-editor .tiptap {
+  outline: none;
+}
+
+.workspace .tiptap,
+.word-page-editor .tiptap {
+  width: 100%;
+}
+
+.a4-page {
+  background: #ffffff;
+  border: 1px solid var(--word-page-border, #e1dfdd);
+  box-shadow: var(--word-page-shadow, 0 8px 24px rgb(60 64 67 / 15%));
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: var(--word-page-height, 1056px);
+  margin: var(--word-page-margin-y, 48px) auto;
+  overflow: hidden;
+  padding: var(--word-page-padding, 96px);
+  position: relative;
+  width: var(--word-page-width, 816px);
+}
+
+.a4-page--body,
+.a4-page--toc {
+  display: block;
+}
+
+.a4-page--landscape {
+  height: var(--word-page-landscape-height, 816px);
+  width: var(--word-page-landscape-width, 1056px);
+}
+
+.a4-page--margin-narrow {
+  padding: var(--word-page-padding-narrow, 48px);
+}
+
+.a4-page--margin-wide {
+  padding: var(--word-page-padding-wide, 128px);
+}
+
+.a4-page--last {
+  margin-bottom: var(--word-page-last-margin-bottom, 96px);
+}
+
+.a4-page > * {
+  color: var(--word-page-text-color, #49454f);
+  font-size: var(--word-page-font-size, 16px);
+  line-height: var(--word-page-line-height, 24px);
+  margin: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.a4-page > * + * {
+  margin-top: var(--word-page-block-gap, 0);
+}
+
+.a4-page ul,
+.a4-page ol {
+  box-sizing: border-box;
+  margin: 0;
+  padding-left: var(--word-page-list-padding-left, 24px);
+}
+
+.a4-page li {
+  padding-left: var(--word-page-list-item-padding-left, 4px);
+}
+
+.a4-page li > p {
+  margin: 0;
+}
+
+.a4-page li + li {
+  margin-top: var(--word-page-list-item-gap, 0);
+}
+
+
+.a4-page p {
+  min-height: var(--word-page-paragraph-min-height, var(--word-page-line-height, 24px));
+}
+
+.a4-page em,
+.a4-page i {
+  font-style: italic;
+}
+
+.a4-page p[data-word-page-split='head'],
+.a4-page p[data-word-page-split='tail'] {
+  margin-bottom: 0;
+  margin-top: 0;
+  text-indent: 0;
+}
+
+.a4-page p:empty::before {
+  content: '';
+  display: inline-block;
+}
+
+.a4-page h2,
+.a4-page h3 {
+  color: var(--word-page-heading-color, #1c1b1f);
+}
+
+.a4-page h3 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  margin-bottom: 8px;
+}
+
+.a4-page--cover {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.a4-page--cover h2 {
+  color: var(--word-page-cover-heading-color, #1c1b1f);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 32px;
+  margin: 52px 0 32px;
+}
+
+.a4-page--cover h2::before {
+  background: var(--word-page-primary, #063f81);
+  content: '';
+  display: block;
+  height: 4px;
+  margin: 0 auto 48px;
+  width: 128px;
+}
+
+.a4-page--cover p {
+  max-width: 560px;
+}
+
+.a4-page--cover p:nth-of-type(1) {
+  color: var(--word-page-muted-color, #49454f);
+  font-size: 16px;
+  line-height: 24px;
+  margin-bottom: 64px;
+}
+
+.a4-page--cover p:nth-of-type(2)::before {
+  align-items: center;
+  background: var(--word-page-surface-container, #f1edeb);
+  border: 1px solid var(--word-page-border, #e1dfdd);
+  border-radius: 8px;
+  color: var(--word-page-primary-container, #2b579a);
+  content: 'account_balance';
+  display: flex;
+  font-family: var(--word-page-icon-font, 'Material Symbols Outlined');
+  font-size: 96px;
+  height: 192px;
+  justify-content: center;
+  margin: 0 auto 64px;
+  opacity: 0.72;
+  width: 192px;
+}
+
+.a4-page--cover p:nth-of-type(7) {
+  color: var(--word-page-primary, #063f81);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 16px;
+  margin-top: auto;
+  padding-top: 128px;
+}
+
+.a4-page--cover p:nth-of-type(n + 7) {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.a4-page--toc p {
+  border-bottom: 1px dotted var(--word-page-border, #e1dfdd);
+  padding-bottom: 4px;
+}
+
+.page-break {
+  border-top: 1px dashed var(--word-page-border, #e1dfdd);
+  height: 0;
+  margin: 24px 0;
+}
+
+.tool-button--active,
+.word-page-command-active {
+  background: var(--word-page-active-bg, #d7e3ff);
+  color: var(--word-page-active-color, #001b3f);
+}
+
+.tool-button:disabled,
+.dropdown-label:disabled,
+.word-page-disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+@media (max-width: 900px) {
+  .a4-page {
+    width: calc(100vw - 32px);
+  }
+}
