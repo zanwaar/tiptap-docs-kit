@@ -454,6 +454,28 @@ export const Page = Node.create<PageOptions>({
             return newState.tr.replaceWith(0, newState.doc.content.size, Fragment.fromArray(normalizedPages))
           }
 
+          const paragraphType = newState.schema.nodes.paragraph
+          if (paragraphType) {
+            const trailingInserts: number[] = []
+            newState.doc.forEach((pageNode, pageOffset) => {
+              if (pageNode.type.name !== this.name) return
+
+              const lastChild = pageNode.lastChild
+              if (lastChild && lastChild.type.name === 'table') {
+                trailingInserts.push(pageOffset + pageNode.nodeSize - 1)
+              }
+            })
+
+            if (trailingInserts.length > 0) {
+              const transaction = newState.tr
+              trailingInserts
+                .sort((first, second) => second - first)
+                .forEach((position) => transaction.insert(position, paragraphType.create()))
+
+              return transaction
+            }
+          }
+
           let hasPage = false
           newState.doc.forEach((node) => {
             if (node.type.name === this.name) hasPage = true
