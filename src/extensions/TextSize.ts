@@ -18,7 +18,7 @@ const normalizeTextSize = (size: string) => {
 
   if (!trimmedSize) return null
 
-  return /^\d+(\.\d+)?$/.test(trimmedSize) ? `${trimmedSize}px` : trimmedSize
+  return /^\d+(\.\d+)?$/.test(trimmedSize) ? `${trimmedSize}pt` : trimmedSize
 }
 
 export const TextSize = Mark.create<TextSizeOptions>({

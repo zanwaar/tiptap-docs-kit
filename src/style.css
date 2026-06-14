@@ -55,8 +55,9 @@
 
 .a4-page > * {
   color: var(--word-page-text-color, #49454f);
-  font-size: var(--word-page-font-size, 16px);
-  line-height: var(--word-page-line-height, 24px);
+  font-family: var(--word-page-font-family, Roboto, Arial, sans-serif);
+  font-size: var(--word-page-font-size, 11pt);
+  line-height: var(--word-page-line-height, 1.15);
   margin: 0;
   max-width: 100%;
   width: 100%;
