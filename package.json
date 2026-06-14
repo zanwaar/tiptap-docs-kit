@@ -1,6 +1,6 @@
 {
   "name": "@zanwaar/tiptap-docs-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Tiptap kit for document editors with Word-like pages, pagination, and document styling.",
   "keywords": [
