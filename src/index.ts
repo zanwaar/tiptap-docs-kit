@@ -30,6 +30,7 @@ import {
   createWordPage,
   createWordPageTemplate,
   defaultPageAttrs,
+  findCurrentPage,
   pageClassNames,
 } from './page-model'
 import type { DocsKitOptions, InsertGridOptions, InsertPageOptions, PageAttrs, PageBreakOptions, PageOptions, WordPageTemplateName } from './types'
@@ -72,6 +73,7 @@ export { createWordPagePastePlugin, insertPlainTextAsWordContent, plainTextToPar
 export { handlePageBackspace } from './keyboard'
 export {
   bindWordPagePagination,
+  mergeSplitWordParagraphs,
   normalizeWordPages,
   paginateWordPages,
   paginateWordPagesUntilStable,
@@ -386,12 +388,12 @@ export const Page = Node.create<PageOptions>({
     return [{ tag: 'section[data-type="page"]' }]
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
     return [
       'section',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         'data-type': 'page',
-        class: pageClassNames(HTMLAttributes as PageAttrs),
+        class: pageClassNames(node.attrs as PageAttrs),
       }),
       0,
     ]
@@ -407,7 +409,18 @@ export const Page = Node.create<PageOptions>({
         class: options.class,
         content: options.content,
       })),
-      setPageAttrs: (attrs) => ({ commands }) => commands.updateAttributes(this.name, attrs),
+      setPageAttrs: (attrs) => ({ editor }) => {
+        const currentPage = findCurrentPage(editor)
+        if (!currentPage) return false
+
+        const transaction = editor.state.tr.setNodeMarkup(currentPage.start, undefined, {
+          ...currentPage.node.attrs,
+          ...attrs,
+        })
+
+        editor.view.dispatch(transaction.scrollIntoView())
+        return true
+      },
       insertWordPageTemplate: (templateName) => ({ commands }) => commands.insertContent(createWordPageTemplate(templateName)),
     }
   },

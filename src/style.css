@@ -23,12 +23,12 @@
   box-shadow: var(--word-page-shadow, none);
   box-sizing: border-box;
   flex-shrink: 0;
-  height: var(--word-page-height, 1056px);
+  height: var(--word-page-height, 1123px);
   margin: var(--word-page-margin-y, 20px) auto;
   overflow: hidden;
   padding: var(--word-page-padding, 96px);
   position: relative;
-  width: var(--word-page-width, 816px);
+  width: var(--word-page-width, 794px);
 }
 
 .a4-page--body,
@@ -37,8 +37,18 @@
 }
 
 .a4-page--landscape {
-  height: var(--word-page-landscape-height, 816px);
-  width: var(--word-page-landscape-width, 1056px);
+  height: var(--word-page-landscape-height, 794px);
+  width: var(--word-page-landscape-width, 1123px);
+}
+
+.a4-page--letter {
+  height: var(--word-page-letter-height, 1056px);
+  width: var(--word-page-letter-width, 816px);
+}
+
+.a4-page--letter.a4-page--landscape {
+  height: var(--word-page-letter-landscape-height, 816px);
+  width: var(--word-page-letter-landscape-width, 1056px);
 }
 
 .a4-page--margin-narrow {

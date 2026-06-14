@@ -378,6 +378,59 @@ export const normalizeWordPages = (editor: Editor): boolean => {
 
 export const removeEmptyTrailingWordPages = normalizeWordPages
 
+export const mergeSplitWordParagraphs = (editor: Editor): boolean => {
+  let mergedAny = false
+
+  for (let guard = 0; guard < 1000; guard += 1) {
+    const pagePositions = getPagePositions(editor)
+    let didMerge = false
+
+    for (let pageIndex = 0; pageIndex < pagePositions.length - 1; pageIndex += 1) {
+      const page = pagePositions[pageIndex].node
+      const nextPage = pagePositions[pageIndex + 1].node
+      if (page.type.name !== 'page' || nextPage.type.name !== 'page') continue
+
+      const lastBlock = page.lastChild
+      const firstNextBlock = nextPage.firstChild
+      if (!lastBlock || !firstNextBlock) continue
+      if (lastBlock.type.name !== 'paragraph' || lastBlock.attrs.wordPageSplit !== 'head') continue
+      if (firstNextBlock.type.name !== 'paragraph') continue
+      if (firstNextBlock.attrs.wordPageSplit !== 'head' && firstNextBlock.attrs.wordPageSplit !== 'tail') continue
+
+      const pageStart = pagePositions[pageIndex].start
+      let lastBlockStart = pageStart + 1
+      for (let index = 0; index < page.childCount - 1; index += 1) {
+        lastBlockStart += page.child(index).nodeSize
+      }
+
+      const firstNextBlockStart = pagePositions[pageIndex + 1].start + 1
+      const isReunited = firstNextBlock.attrs.wordPageSplit === 'tail'
+      const mergedParagraph = lastBlock.type.create(
+        { ...lastBlock.attrs, wordPageSplit: isReunited ? null : 'head' },
+        lastBlock.content.append(firstNextBlock.content),
+        lastBlock.marks,
+      )
+
+      const transaction = editor.state.tr
+      transaction.delete(firstNextBlockStart, firstNextBlockStart + firstNextBlock.nodeSize)
+      transaction.replaceWith(lastBlockStart, lastBlockStart + lastBlock.nodeSize, mergedParagraph)
+      editor.view.dispatch(transaction)
+
+      didMerge = true
+      mergedAny = true
+      break
+    }
+
+    if (!didMerge) break
+  }
+
+  if (mergedAny) {
+    normalizeWordPages(editor)
+  }
+
+  return mergedAny
+}
+
 export const paginateWordPages = (
   editor: Editor,
   rootElement: ParentNode,
@@ -398,6 +451,11 @@ export const paginateWordPages = (
 
   const pageNode = editor.state.doc.child(overflowIndex)
   if (!pageNode || pageNode.type.name !== 'page') return false
+
+  const overflowPageAttrs = createOverflowPageAttrs({
+    ...(pageNode.attrs as PageAttrs),
+    ...(options.createPageAttrs as PageAttrs | undefined),
+  })
 
   let pageStart = 0
   for (let index = 0; index < overflowIndex; index += 1) {
@@ -436,7 +494,7 @@ export const paginateWordPages = (
       }
     } else {
       transaction.insert(nextPageStart, editor.schema.nodes.page.create(
-        createOverflowPageAttrs(options.createPageAttrs),
+        overflowPageAttrs,
         splitTable.tail,
       ))
     }
@@ -460,7 +518,7 @@ export const paginateWordPages = (
       transaction.insert(tailInsertPosition, splitTail.tail)
     } else {
       transaction.insert(nextPageStart, editor.schema.nodes.page.create(
-        createOverflowPageAttrs(options.createPageAttrs),
+        overflowPageAttrs,
         splitTail.tail,
       ))
     }
@@ -484,7 +542,7 @@ export const paginateWordPages = (
       transaction.insert(nextPageStart + 1, lastBlock)
     } else {
       transaction.insert(nextPageStart, editor.schema.nodes.page.create(
-        createOverflowPageAttrs(options.createPageAttrs),
+        overflowPageAttrs,
         lastBlock,
       ))
     }
@@ -499,7 +557,7 @@ export const paginateWordPages = (
 
   if (!nextNode || nextNode.type.name !== 'page') {
     editor.chain().insertContentAt(insertPosition, createWordPage({
-      ...createOverflowPageAttrs(options.createPageAttrs as PageAttrs | undefined),
+      ...overflowPageAttrs,
     })).run()
     return true
   }
