@@ -1,5 +1,5 @@
 import type { Editor, JSONContent } from '@tiptap/core'
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
+import type { Node as ProseMirrorNode, Schema } from '@tiptap/pm/model'
 import type { InsertPageOptions, PageAttrs, PagePosition, WordPageTemplateName } from './types'
 
 export const defaultPageAttrs: Required<Omit<PageAttrs, 'class'>> & Pick<PageAttrs, 'class'> = {
@@ -36,6 +36,11 @@ export const createBlankWordPageDocument = (): JSONContent => ({
   type: 'doc',
   content: [createWordPage()],
 })
+
+export const createEmptyWordPageNode = (schema: Schema): ProseMirrorNode => schema.nodes.page.create(
+  defaultPageAttrs,
+  schema.nodes.paragraph.create(),
+)
 
 export const createWordPageTemplate = (templateName: WordPageTemplateName): JSONContent => {
   const templates: Record<WordPageTemplateName, JSONContent> = {

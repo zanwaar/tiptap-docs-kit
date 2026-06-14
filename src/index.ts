@@ -16,6 +16,8 @@ import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { TableRow } from '@tiptap/extension-table-row'
 import StarterKit from '@tiptap/starter-kit'
+import { Fragment, type Node as ProseMirrorNode } from '@tiptap/pm/model'
+import { Plugin } from '@tiptap/pm/state'
 import { createWordPagePastePlugin } from './paste'
 import { handlePageBackspace } from './keyboard'
 import { TextAlign } from './extensions/TextAlign'
@@ -23,6 +25,7 @@ import { TextColor } from './extensions/TextColor'
 import { TextFont } from './extensions/TextFont'
 import { TextSize } from './extensions/TextSize'
 import {
+  createEmptyWordPageNode,
   createWordPage,
   createWordPageTemplate,
   defaultPageAttrs,
@@ -52,6 +55,7 @@ export type {
 
 export {
   createBlankWordPageDocument,
+  createEmptyWordPageNode,
   createOverflowPageAttrs,
   createWordPage,
   createWordPageDocument,
@@ -181,6 +185,46 @@ const DocsTableRow = TableRow.extend({
     }
   },
 })
+
+const normalizeNestedPages = (doc: ProseMirrorNode): ProseMirrorNode[] | null => {
+  const normalizedPages: ProseMirrorNode[] = []
+  let changed = false
+
+  const collectPages = (page: ProseMirrorNode): ProseMirrorNode[] => {
+    const pageBlocks: ProseMirrorNode[] = []
+    const nestedPages: ProseMirrorNode[] = []
+
+    page.forEach((child) => {
+      if (child.type.name === 'page') {
+        nestedPages.push(child)
+        changed = true
+      } else {
+        pageBlocks.push(child)
+      }
+    })
+
+    const pages = pageBlocks.length > 0 || nestedPages.length === 0
+      ? [page.copy(Fragment.fromArray(pageBlocks))]
+      : []
+
+    nestedPages.forEach((nestedPage) => {
+      pages.push(...collectPages(nestedPage))
+    })
+
+    return pages
+  }
+
+  doc.forEach((node) => {
+    if (node.type.name !== 'page') {
+      normalizedPages.push(node)
+      return
+    }
+
+    normalizedPages.push(...collectPages(node))
+  })
+
+  return changed ? normalizedPages : null
+}
 
 export const DocsKit = Extension.create<DocsKitOptions>({
   name: 'docsKit',
@@ -369,6 +413,25 @@ export const Page = Node.create<PageOptions>({
 
   addProseMirrorPlugins() {
     return [
+      new Plugin({
+        appendTransaction: (transactions, _oldState, newState) => {
+          if (!transactions.some((transaction) => transaction.docChanged)) return null
+
+          const normalizedPages = normalizeNestedPages(newState.doc)
+          if (normalizedPages) {
+            return newState.tr.replaceWith(0, newState.doc.content.size, Fragment.fromArray(normalizedPages))
+          }
+
+          let hasPage = false
+          newState.doc.forEach((node) => {
+            if (node.type.name === this.name) hasPage = true
+          })
+
+          if (hasPage) return null
+
+          return newState.tr.insert(0, createEmptyWordPageNode(newState.schema))
+        },
+      }),
       createWordPagePastePlugin(this.editor, () => ({
         enabled: this.options.pasteAsPlainText,
         minLength: this.options.pasteAsPlainTextMinLength,
