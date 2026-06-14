@@ -20,7 +20,7 @@
 .a4-page {
   background: #ffffff;
   border: 1px solid var(--word-page-border, #e1dfdd);
-  box-shadow: var(--word-page-shadow, 0 8px 24px rgb(60 64 67 / 15%));
+  box-shadow: var(--word-page-shadow, none);
   box-sizing: border-box;
   flex-shrink: 0;
   height: var(--word-page-height, 1056px);
@@ -83,6 +83,23 @@
 
 .a4-page li + li {
   margin-top: var(--word-page-list-item-gap, 0);
+}
+
+.a4-page blockquote {
+  border-left: 4px solid var(--word-page-blockquote-border-color, #c7c5ca);
+  box-sizing: border-box;
+  color: var(--word-page-blockquote-color, var(--word-page-text-color, #49454f));
+  font-style: italic;
+  margin: var(--word-page-blockquote-margin, 8px 0);
+  padding: var(--word-page-blockquote-padding, 0 0 0 16px);
+}
+
+.a4-page blockquote p {
+  margin: 0;
+}
+
+.a4-page blockquote p + p {
+  margin-top: var(--word-page-blockquote-paragraph-gap, 8px);
 }
 
 .a4-page table {
