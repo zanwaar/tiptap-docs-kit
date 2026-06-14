@@ -24,6 +24,7 @@ import { TextAlign } from './extensions/TextAlign'
 import { TextColor } from './extensions/TextColor'
 import { TextFont } from './extensions/TextFont'
 import { TextSize } from './extensions/TextSize'
+import { ParagraphSpacing } from './extensions/ParagraphSpacing'
 import {
   createEmptyWordPageNode,
   createWordPage,
@@ -80,6 +81,7 @@ export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
 export { TextFont } from './extensions/TextFont'
 export { TextSize } from './extensions/TextSize'
+export { ParagraphSpacing } from './extensions/ParagraphSpacing'
 export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, DocsTableRow as TableRow }
 
 declare module '@tiptap/core' {
@@ -236,6 +238,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
       textColor: {},
       textFont: {},
       textSize: {},
+      paragraphSpacing: {},
       table: {
         resizable: true,
       },
@@ -268,6 +271,10 @@ export const DocsKit = Extension.create<DocsKitOptions>({
 
     if (this.options.textSize !== false) {
       extensions.push(TextSize.configure(this.options.textSize))
+    }
+
+    if (this.options.paragraphSpacing !== false) {
+      extensions.push(ParagraphSpacing.configure(this.options.paragraphSpacing))
     }
 
     if (this.options.table !== false) {
