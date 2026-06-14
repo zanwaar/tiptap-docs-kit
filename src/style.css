@@ -219,9 +219,14 @@
   width: 12px;
 }
 
-.a4-page .word-page-image-wrapper:hover .word-page-image-handle,
 .a4-page .word-page-image-wrapper.ProseMirror-selectednode .word-page-image-handle {
   opacity: 1;
+}
+
+@media print {
+  .a4-page .word-page-image-handle {
+    display: none !important;
+  }
 }
 
 .a4-page img.ProseMirror-selectednode {

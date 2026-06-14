@@ -17,7 +17,7 @@ import { TableHeader } from '@tiptap/extension-table-header'
 import { TableRow } from '@tiptap/extension-table-row'
 import StarterKit from '@tiptap/starter-kit'
 import { Fragment, type Node as ProseMirrorNode } from '@tiptap/pm/model'
-import { Plugin } from '@tiptap/pm/state'
+import { Plugin, type Transaction } from '@tiptap/pm/state'
 import { createWordPagePastePlugin } from './paste'
 import { handlePageBackspace } from './keyboard'
 import { TextAlign } from './extensions/TextAlign'
@@ -191,6 +191,32 @@ const DocsTableRow = TableRow.extend({
     }
   },
 })
+
+const normalizeGridCells = (
+  doc: ProseMirrorNode,
+  tr: Transaction,
+): boolean => {
+  let changed = false
+
+  doc.descendants((node, pos) => {
+    if (node.type.name !== 'table') return true
+    if (node.attrs.docsTableKind !== 'grid') return false
+
+    node.descendants((cell, cellOffset) => {
+      if (cell.type.name !== 'tableCell' && cell.type.name !== 'tableHeader') return true
+      if (cell.attrs.docsCellKind === 'grid') return false
+
+      const cellPos = pos + 1 + cellOffset
+      tr.setNodeMarkup(cellPos, undefined, { ...cell.attrs, docsCellKind: 'grid' })
+      changed = true
+      return false
+    })
+
+    return false
+  })
+
+  return changed
+}
 
 const normalizeNestedPages = (doc: ProseMirrorNode): ProseMirrorNode[] | null => {
   const normalizedPages: ProseMirrorNode[] = []
@@ -464,6 +490,11 @@ export const Page = Node.create<PageOptions>({
           const normalizedPages = normalizeNestedPages(newState.doc)
           if (normalizedPages) {
             return newState.tr.replaceWith(0, newState.doc.content.size, Fragment.fromArray(normalizedPages))
+          }
+
+          const gridTransaction = newState.tr
+          if (normalizeGridCells(newState.doc, gridTransaction)) {
+            return gridTransaction
           }
 
           const paragraphType = newState.schema.nodes.paragraph
