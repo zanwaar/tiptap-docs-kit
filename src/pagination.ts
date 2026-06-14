@@ -10,6 +10,9 @@ import type {
   WordPageStablePaginationOptions,
 } from './types'
 
+const MIN_TEXT_SPLIT_HEAD_LENGTH = 40
+const MIN_TEXT_SPLIT_TAIL_LENGTH = 16
+
 const findNearestWordBoundary = (text: string, preferredOffset: number): number => {
   const safeOffset = Math.max(1, Math.min(preferredOffset, text.length - 1))
   const before = text.lastIndexOf(' ', safeOffset)
@@ -40,7 +43,14 @@ const findReadableSplitRange = (text: string, preferredOffset?: number | null): 
 
   const wordOffset = text.lastIndexOf(' ', safePreferredOffset)
   if (wordOffset > 0 && wordOffset < trimmedEnd) {
-    return trimSplitWhitespace(text, wordOffset + 1)
+    const splitRange = trimSplitWhitespace(text, wordOffset + 1)
+    const tailLength = trimmedEnd - splitRange.cutOffset
+
+    if (splitRange.deleteOffset < MIN_TEXT_SPLIT_HEAD_LENGTH || tailLength < MIN_TEXT_SPLIT_TAIL_LENGTH) {
+      return null
+    }
+
+    return splitRange
   }
 
   return null
@@ -321,12 +331,14 @@ const reflowBlocksBackward = (
       : pageElement.getBoundingClientRect().top + pagePaddingTop
     const availableHeight = contentBottom - lastBlockBottom
     const firstNextBlockHeight = firstNextBlockElement.getBoundingClientRect().height
-    if (firstNextBlockHeight > availableHeight) continue
 
     const pageStart = pagePositions[pageIndex].start
     const nextPageStart = pagePositions[pageIndex + 1].start
     const insertPosition = pageStart + page.nodeSize - 1
     const firstNextBlockStart = nextPageStart + 1
+
+    if (firstNextBlockHeight > availableHeight) continue
+
     const transaction = editor.state.tr.delete(firstNextBlockStart, firstNextBlockStart + firstNextBlock.nodeSize)
     transaction.insert(transaction.mapping.map(insertPosition), firstNextBlock)
 
