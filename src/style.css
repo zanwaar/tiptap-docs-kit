@@ -189,16 +189,27 @@
   display: inline-block;
 }
 
+.a4-page h1,
 .a4-page h2,
 .a4-page h3 {
   color: var(--word-page-heading-color, #1c1b1f);
+  font-weight: 700;
+  margin: 0;
+}
+
+.a4-page h1 {
+  font-size: 20pt;
+  line-height: 1.2;
+}
+
+.a4-page h2 {
+  font-size: 16pt;
+  line-height: 1.25;
 }
 
 .a4-page h3 {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 28px;
-  margin-bottom: 8px;
+  font-size: 14pt;
+  line-height: 1.25;
 }
 
 .a4-page--cover {
