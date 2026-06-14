@@ -25,6 +25,7 @@ import { TextColor } from './extensions/TextColor'
 import { TextFont } from './extensions/TextFont'
 import { TextSize } from './extensions/TextSize'
 import { ParagraphSpacing } from './extensions/ParagraphSpacing'
+import { ResizableImage } from './extensions/ResizableImage'
 import {
   createEmptyWordPageNode,
   createWordPage,
@@ -84,6 +85,7 @@ export { TextColor } from './extensions/TextColor'
 export { TextFont } from './extensions/TextFont'
 export { TextSize } from './extensions/TextSize'
 export { ParagraphSpacing } from './extensions/ParagraphSpacing'
+export { ResizableImage } from './extensions/ResizableImage'
 export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, DocsTableRow as TableRow }
 
 declare module '@tiptap/core' {
@@ -249,6 +251,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
       tableRow: {},
       page: {},
       pageBreak: {},
+      image: {},
     }
   },
 
@@ -301,6 +304,15 @@ export const DocsKit = Extension.create<DocsKitOptions>({
 
     if (this.options.pageBreak !== false) {
       extensions.push(PageBreak.configure(this.options.pageBreak))
+    }
+
+    if (this.options.image !== false) {
+      extensions.push(ResizableImage.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: { class: 'word-page-image' },
+        ...this.options.image,
+      }))
     }
 
     return extensions

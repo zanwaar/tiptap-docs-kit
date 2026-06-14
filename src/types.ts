@@ -44,6 +44,7 @@ export interface DocsKitOptions {
   tableRow: false | Partial<TableRowOptions>
   page: false | Partial<PageOptions>
   pageBreak: false | Partial<PageBreakOptions>
+  image: false | Record<string, unknown>
 }
 
 export interface InsertPageOptions extends PageAttrs {

@@ -1,17 +1,37 @@
 # tiptap-docs-kit
 
-`tiptap-docs-kit` adalah extension kit untuk membangun editor dokumen berbasis Tiptap dengan pengalaman seperti word processor. Package ini menggabungkan extension umum, halaman A4, page break, pagination, text alignment, text color, dan style dokumen dalam satu tempat.
+`tiptap-docs-kit` adalah extension kit untuk membangun editor dokumen berbasis Tiptap dengan pengalaman seperti word processor (mirip Google Docs / Microsoft Word). Package ini menggabungkan extension umum, halaman A4/Letter, page break, pagination, alignment, warna teks, ukuran font, line spacing, gambar, dan style dokumen dalam satu tempat.
+
+![tiptap-docs-kit preview](./preview.png)
+
+## Demo
+
+- Contoh penggunaan (playground React): https://github.com/zanwaar/playground-react
+
+Jalankan demo secara lokal:
+
+```bash
+git clone https://github.com/zanwaar/playground-react
+cd playground-react
+npm install
+npm run dev
+```
 
 ## Fitur
 
 - `DocsKit` sebagai satu extension bundle untuk editor dokumen.
-- Page model seperti Word/Docs dengan node `page`.
+- Page model seperti Word/Docs dengan node `page` (A4 & Letter, potret/lanskap).
+- Pengaturan halaman: ukuran kertas, orientasi, dan margin (preset atau kustom per sisi dalam cm).
 - Page break dengan node `pageBreak`.
-- Pagination helper untuk menjaga konten antar halaman.
+- Pagination otomatis untuk menjaga konten antar halaman.
+- Heading (1/2/3) dan Normal text.
 - Text alignment untuk paragraph dan heading.
-- Text color mark dengan command `setTextColor` dan `unsetTextColor`.
-- Table editing dengan insert, add/delete row/column, merge/split cell, dan resize column.
-- Table-aware pagination yang memecah tabel panjang per row saat melewati batas halaman.
+- Text color, text font, dan text size (berbasis `pt`).
+- Line spacing (1, 1.15, 1.5, 2) plus spasi sebelum/sesudah paragraf.
+- Gambar yang dapat di-resize (drag handle), mendukung base64.
+- Table editing: insert, add/delete row/column, merge/split cell, resize column, dan grid.
+- Table-aware pagination yang memecah tabel panjang per row dengan header berulang.
+- Paragraf otomatis disisipkan di bawah tabel agar mudah lanjut menulis.
 - CSS dokumen satu file lewat `tiptap-docs-kit/style.css`.
 - Helper untuk membuat dokumen kosong dan template dokumen.
 
@@ -90,7 +110,8 @@ Package ini menambahkan beberapa command ke Tiptap.
 
 ```ts
 editor.chain().focus().insertPage({ pageType: 'body' }).run()
-editor.chain().focus().setPageAttrs({ margin: 'narrow' }).run()
+editor.chain().focus().setPageAttrs({ paperSize: 'a4', orientation: 'portrait', margin: 'narrow' }).run()
+editor.chain().focus().setPageAttrs({ marginValue: '2cm 1.5cm 1.5cm 1.5cm' }).run()
 editor.chain().focus().insertPageBreak().run()
 editor.chain().focus().insertWordPageTemplate('cover').run()
 ```
@@ -104,12 +125,32 @@ editor.chain().focus().setTextAlign('right').run()
 editor.chain().focus().setTextAlign('justify').run()
 ```
 
-### Text Color
+### Text Color, Font, Size
 
 ```ts
 editor.chain().focus().setTextColor('#063f81').run()
 editor.chain().focus().unsetTextColor().run()
+editor.chain().focus().setTextFont('Roboto, Arial, sans-serif').run()
+editor.chain().focus().setTextSize('11pt').run()
 ```
+
+### Line Spacing
+
+```ts
+editor.chain().focus().setLineSpacing('1.5').run()
+editor.chain().focus().unsetLineSpacing().run()
+editor.chain().focus().setParagraphSpaceBefore('12pt').run()
+editor.chain().focus().setParagraphSpaceAfter('12pt').run()
+```
+
+### Image
+
+```ts
+// Disisipkan sebagai node image. Bisa base64 atau URL.
+editor.chain().focus().insertContent({ type: 'image', attrs: { src, alt: 'Gambar' } }).run()
+```
+
+Gambar dapat di-resize dengan menarik handle di pojok kanan bawah. Lebar disimpan pada atribut `width` node image.
 
 ### Table
 
@@ -134,20 +175,18 @@ Tabel panjang akan dipisah antar halaman pada batas row. Jika tabel memiliki hea
 ```ts
 DocsKit.configure({
   starterKit: {},
-  textAlign: {
-    types: ['paragraph', 'heading'],
-  },
+  textAlign: { types: ['paragraph', 'heading'] },
   textColor: {},
-  table: {
-    resizable: true,
-  },
+  textFont: {},
+  textSize: {},
+  paragraphSpacing: { types: ['paragraph', 'heading'] },
+  table: { resizable: true },
   tableCell: {},
   tableHeader: {},
   tableRow: {},
-  page: {
-    pasteAsPlainText: true,
-  },
+  page: { pasteAsPlainText: true },
   pageBreak: {},
+  image: { inline: false, allowBase64: true },
 })
 ```
 
@@ -171,12 +210,13 @@ Style utama dikontrol melalui CSS variables:
 
 ```css
 .word-editor-document {
-  --word-page-width: 816px;
-  --word-page-height: 1056px;
+  --word-page-width: 794px;
+  --word-page-height: 1123px;
   --word-page-padding: 96px;
   --word-page-text-color: #49454f;
-  --word-page-font-size: 16px;
-  --word-page-line-height: 24px;
+  --word-page-font-family: Roboto, Arial, sans-serif;
+  --word-page-font-size: 11pt;
+  --word-page-line-height: 1.15;
 }
 ```
 
@@ -193,7 +233,13 @@ import {
   TableRow,
   TextAlign,
   TextColor,
+  TextFont,
+  TextSize,
+  ParagraphSpacing,
+  ResizableImage,
   bindWordPagePagination,
+  mergeSplitWordParagraphs,
+  normalizeWordPages,
   createBlankWordPageDocument,
   createWordPage,
   createWordPageDocument,
@@ -215,4 +261,4 @@ Build akan menghasilkan output ke `dist/` dan menyalin `src/style.css` menjadi `
 
 ## Catatan Arsitektur
 
-Package ini fokus pada logic Tiptap dan CSS dokumen. UI React seperti toolbar, status bar, sidebar, atau dialog color picker sebaiknya tetap berada di aplikasi consumer atau package React terpisah.
+Package ini fokus pada logic Tiptap dan CSS dokumen. UI React seperti toolbar, status bar, sidebar, atau dialog color picker sebaiknya tetap berada di aplikasi consumer atau package React terpisah. Lihat contoh implementasi UI lengkap di https://github.com/zanwaar/playground-react.

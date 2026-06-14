@@ -182,6 +182,52 @@
   min-height: var(--word-page-paragraph-min-height, var(--word-page-line-height, 24px));
 }
 
+.a4-page .word-page-image,
+.a4-page img {
+  display: block;
+  height: auto;
+  margin: 8px 0;
+  max-width: 100%;
+}
+
+.a4-page .word-page-image-wrapper {
+  display: block;
+  width: fit-content;
+  margin: 8px 0;
+  max-width: 100%;
+  position: relative;
+}
+
+.a4-page .word-page-image-wrapper .word-page-image {
+  display: block;
+  height: auto;
+  margin: 0;
+  max-width: 100%;
+}
+
+.a4-page .word-page-image-handle {
+  background: var(--word-page-primary, #063f81);
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  bottom: -6px;
+  cursor: nwse-resize;
+  height: 12px;
+  opacity: 0;
+  position: absolute;
+  right: -6px;
+  transition: opacity 120ms ease;
+  width: 12px;
+}
+
+.a4-page .word-page-image-wrapper:hover .word-page-image-handle,
+.a4-page .word-page-image-wrapper.ProseMirror-selectednode .word-page-image-handle {
+  opacity: 1;
+}
+
+.a4-page img.ProseMirror-selectednode {
+  outline: 2px solid var(--word-page-primary, #063f81);
+}
+
 .a4-page em,
 .a4-page i {
   font-style: italic;

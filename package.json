@@ -23,6 +23,7 @@
   },
   "peerDependencies": {
     "@tiptap/core": "^3.26.1",
+    "@tiptap/extension-image": "^3.26.1",
     "@tiptap/extension-table": "^3.26.1",
     "@tiptap/extension-table-cell": "^3.26.1",
     "@tiptap/extension-table-header": "^3.26.1",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@tiptap/core": "^3.26.1",
+    "@tiptap/extension-image": "^3.26.1",
     "@tiptap/extension-table": "^3.26.1",
     "@tiptap/extension-table-cell": "^3.26.1",
     "@tiptap/extension-table-header": "^3.26.1",
