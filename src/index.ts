@@ -20,6 +20,7 @@ import { createWordPagePastePlugin } from './paste'
 import { handlePageBackspace } from './keyboard'
 import { TextAlign } from './extensions/TextAlign'
 import { TextColor } from './extensions/TextColor'
+import { TextSize } from './extensions/TextSize'
 import {
   createWordPage,
   createWordPageTemplate,
@@ -72,6 +73,7 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
+export { TextSize } from './extensions/TextSize'
 export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, DocsTableRow as TableRow }
 
 declare module '@tiptap/core' {
@@ -186,6 +188,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
       starterKit: {},
       textAlign: {},
       textColor: {},
+      textSize: {},
       table: {
         resizable: true,
       },
@@ -210,6 +213,10 @@ export const DocsKit = Extension.create<DocsKitOptions>({
 
     if (this.options.textColor !== false) {
       extensions.push(TextColor.configure(this.options.textColor))
+    }
+
+    if (this.options.textSize !== false) {
+      extensions.push(TextSize.configure(this.options.textSize))
     }
 
     if (this.options.table !== false) {

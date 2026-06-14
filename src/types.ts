@@ -34,6 +34,7 @@ export interface DocsKitOptions {
   starterKit: false | Record<string, unknown>
   textAlign: false | { types?: string[] }
   textColor: false | Record<string, unknown>
+  textSize: false | Record<string, unknown>
   table: false | Partial<TableOptions>
   tableCell: false | Partial<TableCellOptions>
   tableHeader: false | Partial<TableHeaderOptions>
