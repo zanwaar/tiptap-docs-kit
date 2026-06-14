@@ -20,6 +20,7 @@ import { createWordPagePastePlugin } from './paste'
 import { handlePageBackspace } from './keyboard'
 import { TextAlign } from './extensions/TextAlign'
 import { TextColor } from './extensions/TextColor'
+import { TextFont } from './extensions/TextFont'
 import { TextSize } from './extensions/TextSize'
 import {
   createWordPage,
@@ -73,6 +74,7 @@ export {
 } from './pagination'
 export { TextAlign } from './extensions/TextAlign'
 export { TextColor } from './extensions/TextColor'
+export { TextFont } from './extensions/TextFont'
 export { TextSize } from './extensions/TextSize'
 export { DocsTable as Table, DocsTableCell as TableCell, DocsTableHeader as TableHeader, DocsTableRow as TableRow }
 
@@ -188,6 +190,7 @@ export const DocsKit = Extension.create<DocsKitOptions>({
       starterKit: {},
       textAlign: {},
       textColor: {},
+      textFont: {},
       textSize: {},
       table: {
         resizable: true,
@@ -213,6 +216,10 @@ export const DocsKit = Extension.create<DocsKitOptions>({
 
     if (this.options.textColor !== false) {
       extensions.push(TextColor.configure(this.options.textColor))
+    }
+
+    if (this.options.textFont !== false) {
+      extensions.push(TextFont.configure(this.options.textFont))
     }
 
     if (this.options.textSize !== false) {
