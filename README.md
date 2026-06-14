@@ -4,9 +4,10 @@
 
 ![tiptap-docs-kit preview](./preview.png)
 
-## Demo
+## Tautan
 
-- Contoh penggunaan (playground React): https://github.com/zanwaar/playground-react
+- Package (repo utama): https://github.com/zanwaar/tiptap-docs-kit
+- Demo implementasi (playground React): https://github.com/zanwaar/playground-react
 
 Jalankan demo secara lokal:
 
@@ -36,6 +37,14 @@ npm run dev
 - Helper untuk membuat dokumen kosong dan template dokumen.
 
 ## Instalasi
+
+Install dari npm:
+
+```bash
+npm install tiptap-docs-kit @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-table @tiptap/extension-table-cell @tiptap/extension-table-header @tiptap/extension-table-row
+```
+
+`tiptap-docs-kit` memakai package Tiptap di atas sebagai peer dependencies, jadi pastikan ikut terpasang.
 
 Untuk local development di monorepo/playground:
 

@@ -1,8 +1,34 @@
 {
   "name": "tiptap-docs-kit",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Tiptap kit for document editors with Word-like pages, pagination, and document styling.",
+  "keywords": [
+    "tiptap",
+    "prosemirror",
+    "editor",
+    "wysiwyg",
+    "document",
+    "pagination",
+    "word",
+    "a4"
+  ],
+  "license": "MIT",
+  "author": "zanwaar",
+  "homepage": "https://github.com/zanwaar/tiptap-docs-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zanwaar/tiptap-docs-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zanwaar/tiptap-docs-kit/issues"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,12 +40,16 @@
     "./style.css": "./dist/style.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "preview.png"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && cp src/style.css dist/style.css",
     "dev": "tsc -p tsconfig.json --watch",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@tiptap/core": "^3.26.1",
