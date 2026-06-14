@@ -2,11 +2,12 @@ import type { Editor, JSONContent } from '@tiptap/core'
 import type { Node as ProseMirrorNode, Schema } from '@tiptap/pm/model'
 import type { InsertPageOptions, PageAttrs, PagePosition, WordPageTemplateName } from './types'
 
-export const defaultPageAttrs: Required<Omit<PageAttrs, 'class'>> & Pick<PageAttrs, 'class'> = {
+export const defaultPageAttrs: Required<Omit<PageAttrs, 'class' | 'marginValue'>> & Pick<PageAttrs, 'class' | 'marginValue'> = {
   pageType: 'body',
   paperSize: 'a4',
   orientation: 'portrait',
   margin: 'normal',
+  marginValue: null,
   class: null,
 }
 
@@ -27,6 +28,7 @@ export const createWordPage = (options: InsertPageOptions = {}): JSONContent => 
     paperSize: options.paperSize ?? defaultPageAttrs.paperSize,
     orientation: options.orientation ?? defaultPageAttrs.orientation,
     margin: options.margin ?? defaultPageAttrs.margin,
+    marginValue: options.marginValue ?? defaultPageAttrs.marginValue,
     class: options.class ?? defaultPageAttrs.class,
   },
   content: options.content ?? [{ type: 'paragraph' }],

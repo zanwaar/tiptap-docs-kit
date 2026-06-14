@@ -355,6 +355,18 @@ export const Page = Node.create<PageOptions>({
         parseHTML: (element) => element.getAttribute('data-margin') ?? defaultPageAttrs.margin,
         renderHTML: (attributes) => ({ 'data-margin': attributes.margin }),
       },
+      marginValue: {
+        default: defaultPageAttrs.marginValue,
+        parseHTML: (element) => element.getAttribute('data-margin-value') ?? defaultPageAttrs.marginValue,
+        renderHTML: (attributes) => {
+          if (!attributes.marginValue) return {}
+
+          return {
+            'data-margin-value': attributes.marginValue,
+            style: `padding: ${attributes.marginValue}`,
+          }
+        },
+      },
       class: {
         default: defaultPageAttrs.class,
         parseHTML: () => defaultPageAttrs.class,

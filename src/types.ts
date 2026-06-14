@@ -12,6 +12,7 @@ export interface PageAttrs {
   paperSize?: PaperSize
   orientation?: PageOrientation
   margin?: PageMargin
+  marginValue?: string | null
   class?: string | null
 }
 
