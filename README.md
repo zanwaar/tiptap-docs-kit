@@ -33,7 +33,7 @@ npm run dev
 - Table editing: insert, add/delete row/column, merge/split cell, resize column, dan grid.
 - Table-aware pagination yang memecah tabel panjang per row dengan header berulang.
 - Paragraf otomatis disisipkan di bawah tabel agar mudah lanjut menulis.
-- CSS dokumen satu file lewat `tiptap-docs-kit/style.css`.
+- CSS dokumen satu file lewat `@zanwaar/tiptap-docs-kit/style.css`.
 - Helper untuk membuat dokumen kosong dan template dokumen.
 
 ## Instalasi
@@ -41,7 +41,7 @@ npm run dev
 Install dari npm:
 
 ```bash
-npm install tiptap-docs-kit @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-table @tiptap/extension-table-cell @tiptap/extension-table-header @tiptap/extension-table-row
+npm install @zanwaar/tiptap-docs-kit @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-table @tiptap/extension-table-cell @tiptap/extension-table-header @tiptap/extension-table-row
 ```
 
 `tiptap-docs-kit` memakai package Tiptap di atas sebagai peer dependencies, jadi pastikan ikut terpasang.
@@ -51,7 +51,7 @@ Untuk local development di monorepo/playground:
 ```json
 {
   "dependencies": {
-    "tiptap-docs-kit": "file:../../packages/tiptap-docs-kit"
+    "@zanwaar/tiptap-docs-kit": "file:../../packages/tiptap-docs-kit"
   }
 }
 ```
@@ -66,8 +66,8 @@ npm install
 
 ```tsx
 import { useEditor } from '@tiptap/react'
-import { DocsKit, createBlankWordPageDocument } from 'tiptap-docs-kit'
-import 'tiptap-docs-kit/style.css'
+import { DocsKit, createBlankWordPageDocument } from '@zanwaar/tiptap-docs-kit'
+import '@zanwaar/tiptap-docs-kit/style.css'
 
 export function Editor() {
   const editor = useEditor({
@@ -92,7 +92,7 @@ Gunakan `bindWordPagePagination` pada container scroll editor.
 import { useEffect, useRef } from 'react'
 import { EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
-import { bindWordPagePagination } from 'tiptap-docs-kit'
+import { bindWordPagePagination } from '@zanwaar/tiptap-docs-kit'
 
 export function Workspace({ editor }: { editor: Editor | null }) {
   const workspaceRef = useRef<HTMLElement>(null)
@@ -212,7 +212,7 @@ DocsKit.configure({
 Import style sekali di aplikasi consumer:
 
 ```ts
-import 'tiptap-docs-kit/style.css'
+import '@zanwaar/tiptap-docs-kit/style.css'
 ```
 
 Style utama dikontrol melalui CSS variables:
@@ -253,7 +253,7 @@ import {
   createWordPage,
   createWordPageDocument,
   createWordPageTemplate,
-} from 'tiptap-docs-kit'
+} from '@zanwaar/tiptap-docs-kit'
 ```
 
 ## Development
